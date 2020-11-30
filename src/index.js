@@ -1,3 +1,5 @@
+// Express 2 - 🚀 Lecture depuis la base de données
+
 const express = require("express");
 const movies = require("./movies");
 const connection = require("../config");
@@ -19,7 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/movies", (req, res) => {
-  connection.query("SELECT * from movies WHERE id=1", (err, results) => {
+  connection.query("SELECT * from movies", (err, results) => {
     if (err) {
       res.status(500).send("Error retrieving data");
     } else {
@@ -29,25 +31,39 @@ app.get("/api/movies", (req, res) => {
 });
 
 app.get("/api/movies/:id", (req, res) => {
-  const movie = movies.find((movie) => {
-    return movie.id === Number(req.params.id);
-  });
-  if (movie) {
-    res.status(200).json(movie);
-  } else {
-    res.status(404).send("Not found");
-  }
+  connection.query("SELECT * FROM movies", (err, movies)=>{
+    if (err) {
+      res.status(500).send("Error retrieving data");
+    } else {
+      const movie = movies.find((movie) => {
+        return movie.id === Number(req.params.id);
+      });
+      if (movie) {
+        res.status(200).json(movie);
+      } else {
+        res.status(404).send("Not found");
+      }
+    }
+  })
+  
 });
 
 app.get("/api/search", (req, res) => {
-  const matchingMovies = movies.filter(
-    (movie) => movie.duration <= req.query.durationMax
-  );
-  if (matchingMovies.length > 0) {
-    res.json(matchingMovies);
-  } else {
-    res.status(404).send("No movies found for this duration");
-  }
+  connection.query("SELECT * FROM movies", (err,movies)=>{
+    if (err){
+      res.status(500).send("Error retrieving data");
+    }else{
+      const matchingMovies = movies.filter(
+        (movie) => movie.duration <= req.query.durationMax
+      );
+      if (matchingMovies.length > 0) {
+        res.json(matchingMovies);
+      } else {
+        res.status(404).send("No movies found for this duration");
+      }
+    }
+  })
+  
 });
 
 app.get("/api/user", (req, res) => {
@@ -56,4 +72,5 @@ app.get("/api/user", (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is runing on 3000`);
+  
 });
